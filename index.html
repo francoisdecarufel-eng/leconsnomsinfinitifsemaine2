@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aventure Grammaticale - 4e Année</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comic Neue', sans-serif;
+      background-color: #f0fdf4;
+      user-select: none;
+    }
+    .font-comic {
+      font-family: 'Fredoka', sans-serif;
+    }
+    /* Custom Scrollbar for TNI */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4ade80;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #22c55e;
+    }
+  </style>
+
+  <!-- MANDATORY BABEL PRESET REGISTRATION -->
+  <script>
+    Babel.registerPreset('react-classic', {
+      presets: [
+        [Babel.availablePresets['react'], { runtime: 'classic' }]
+      ]
+    });
+  </script>
+</head>
+<body class="bg-emerald-50 text-slate-800 min-h-screen flex flex-col">
+
+  <div id="root" class="flex-1 flex flex-col min-h-screen"></div>
+
+  <script type="text/babel" data-presets="react-classic">
+    const { useState, useEffect } = React;
+
+    // Web Audio Sound System
+    const playSound = (type) => {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+          osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.35);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+          osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.25);
+        } else if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.08);
+        }
+      } catch (e) {
+        // Fallback silently if audio context disabled
+      }
+    };
+
+    // --- DATA SETS ---
+
+    // TAB 1 QUESTIONS (Le Nom Commun - 8 exercises)
+    const TAB1_QUESTIONS = [
+      {
+        id: 1,
+        type: 'qcm',
+        question: "Dans la phrase : « L'élève écoute attentivement son enseignant. », quel mot est un nom commun désignant une personne ?",
+        options: ["élève", "écoute", "attentivement", "son"],
+        correct: "élève",
+        hint: "Astuce : Tu peux placer un déterminant devant ce mot (un/l').",
+        explanation: "« Élève » est un nom commun qui désigne une personne. On peut dire « un élève »."
+      },
+      {
+        id: 2,
+        type: 'tf',
+        question: "Vrai ou Faux : Tous les noms communs désignent seulement des objets.",
+        options: ["Vrai", "Faux"],
+        correct: "Faux",
+        hint: "Pense aux animaux, aux personnes, aux lieux et aux sentiments !",
+        explanation: "C'est Faux ! Le nom permet de désigner une personne, un animal, un objet, un lieu, un sentiment, etc."
+      },
+      {
+        id: 3,
+        type: 'qcm',
+        question: "Laquelle de ces paires contient uniquement des NOMS COMMUNS de la classe d'école ?",
+        options: ["Cahier et Pupitre", "Cahier et Écrire", "Grand et Pupitre", "Sur et Crayon"],
+        correct: "Cahier et Pupitre",
+        hint: "Cherche deux mots devant lesquels on peut mettre « un » ou « le ».",
+        explanation: "« Cahier » (un cahier) et « Pupitre » (un pupitre) sont deux noms communs d'objets de la classe."
+      },
+      {
+        id: 4,
+        type: 'qcm',
+        question: "Quel test d'identification (astuce) permet de vérifier si un mot est un nom ?",
+        options: [
+          "Ajouter « ne... pas » autour du mot",
+          "Placer un déterminant (ex: un, la) ou un adjectif devant le mot",
+          "Remplacer le mot par « demain »",
+          "Changer le mot de couleur"
+        ],
+        correct: "Placer un déterminant (ex: un, la) ou un adjectif devant le mot",
+        hint: "Pense à la façon de vérifier si on peut dire « une ... » ou « un beau ... ».",
+        explanation: "Pour identifier un nom, on peut placer un déterminant (un, la) ou un adjectif (beau, grand) juste avant !"
+      },
+      {
+        id: 5,
+        type: 'tf',
+        question: "Vrai ou Faux : Dans « Le petit chat dort dans le panier », le mot « chat » donne son genre et son nombre à « petit » et « Le ».",
+        options: ["Vrai", "Faux"],
+        correct: "Vrai",
+        hint: "Le nom donne son genre (m./f.) et son nombre (s./pl.) au déterminant et à l'adjectif.",
+        explanation: "Vrai ! Le nom donne son genre (masculin) et son nombre (singulier) au déterminant « Le » et à l'adjectif « petit »."
+      },
+      {
+        id: 6,
+        type: 'qcm',
+        question: "Dans la phrase : « Les récréations amusantes passent vite dans la cour », identifie TOUS les noms communs.",
+        options: [
+          "récréations, cour",
+          "amusantes, passent",
+          "Les, dans",
+          "récréations, vite"
+        ],
+        correct: "récréations, cour",
+        hint: "Il y a un nom pour le moment de jeu (les ...) et un nom pour le lieu (la ...).",
+        explanation: "« Récréations » (des récréations) et « cour » (la cour) sont les deux noms communs de la phrase."
+      },
+      {
+        id: 7,
+        type: 'qcm',
+        question: "À quelle personne grammaticale le nom commun appartient-il TOUJOURS ?",
+        options: ["1re personne", "2e personne", "3e personne", "4e personne"],
+        correct: "3e personne",
+        hint: "Pense à quel sujet on remplace un nom (il, elle, ils, elles).",
+        explanation: "Le nom possède toujours une personne : la 3e personne (singulier ou pluriel). Il peut ainsi donner sa personne au verbe !"
+      },
+      {
+        id: 8,
+        type: 'qcm',
+        question: "Quel mot de la phrase suivante est un nom désignant un sentiment/émotion ? « La joie se lisait sur le visage de Julie à l'école. »",
+        options: ["joie", "visage", "école", "lisait"],
+        correct: "joie",
+        hint: "Cherche le mot qui exprime ce que l'on ressent.",
+        explanation: "« Joie » est un nom commun féminin singulier qui désigne un sentiment !"
+      }
+    ];
+
+    // TAB 2 QUESTIONS (Genre et Nombre - 8 exercises)
+    const TAB2_QUESTIONS = [
+      {
+        id: 1,
+        type: 'qcm',
+        question: "Quel est le genre et le nombre du groupe du nom : « des belles framboises » ?",
+        options: [
+          "Féminin pluriel",
+          "Masculin pluriel",
+          "Féminin singulier",
+          "Masculin singulier"
+        ],
+        correct: "Féminin pluriel",
+        hint: "On dit UNE framboise et il y en a plusieurs (s).",
+        explanation: "« Framboise » est un nom féminin. Avec « des » et le « s » final, c'est au féminin pluriel !"
+      },
+      {
+        id: 2,
+        type: 'tf',
+        question: "Vrai ou Faux : Les mots « hibou », « pinceau » et « brocoli » sont tous des noms masculins.",
+        options: ["Vrai", "Faux"],
+        correct: "Vrai",
+        hint: "Essaye d'utiliser le déterminant « un » ou « le » devant chaque mot.",
+        explanation: "Vrai ! On dit un hibou, un pinceau, un brocoli. Ce sont tous des noms masculins."
+      },
+      {
+        id: 3,
+        type: 'qcm',
+        question: "Complète correctement la phrase : « Dans le gymnase, les ____ courances sautent fort. »",
+        options: ["fillettes", "garçon", "enfant", "élève"],
+        correct: "fillettes",
+        hint: "Le déterminant est « les » (pluriel) et on cherche un sujet féminin pluriel.",
+        explanation: "« Fillettes » est au féminin pluriel, ce qui s'accorde avec le déterminant « les » et le reste du groupe."
+      },
+      {
+        id: 4,
+        type: 'qcm',
+        question: "Comment vérifie-t-on si un nom commun est féminin ?",
+        options: [
+          "On place « une » ou « la » devant le nom",
+          "On ajoute un « x » à la fin",
+          "On regarde s'il y a un verbe",
+          "On place « un » ou « le » devant"
+        ],
+        correct: "On place « une » ou « la » devant le nom",
+        hint: "Pour le féminin, utilise « une » ou « la » (ex: une balançoire).",
+        explanation: "Pour vérifier le genre féminin, on tente de placer le déterminant « une » ou « la » devant le nom."
+      },
+      {
+        id: 5,
+        type: 'tf',
+        question: "Vrai ou Faux : Un nom est au pluriel lorsqu'il désigne une seule et unique réalité.",
+        options: ["Vrai", "Faux"],
+        correct: "Faux",
+        hint: "Pense au sens des mots « singulier » (un seul) et « pluriel » (plusieurs).",
+        explanation: "Faux ! Lorsqu'un nom désigne une seule chose, il est au SINGULIER. Il est au PLURIEL lorsqu'il en désigne plusieurs."
+      },
+      {
+        id: 6,
+        type: 'qcm',
+        question: "Dans le groupe du nom « [ ? ] beaux crayons colorés », quel déterminant convient pour accorder correctement ?",
+        options: ["Des", "Une", "La", "Le"],
+        correct: "Des",
+        hint: "« Crayons » est masculin pluriel.",
+        explanation: "« Crayons » est un nom masculin pluriel, il exige le déterminant pluriel « Des »."
+      },
+      {
+        id: 7,
+        type: 'qcm',
+        question: "Regarde ce groupe du nom : « Cette grande horloge ». Quel mot DONNE son genre (féminin) et son nombre (singulier) aux autres ?",
+        options: ["horloge", "Cette", "grande", "Aucun"],
+        correct: "horloge",
+        hint: "C'est le NOM donneur d'accord !",
+        explanation: "Le nom « horloge » est le donneur d'accord. Il donne son féminin et son singulier à « Cette » (déterminant) et « grande » (adjectif)."
+      },
+      {
+        id: 8,
+        type: 'qcm',
+        question: "Lequel de ces mots est au SINGULIER ?",
+        options: ["Balançoire", "Hiboux", "Framboises", "Pinceaux"],
+        correct: "Balançoire",
+        hint: "Cherche le mot qui n'a pas de « s » ni de « x » à la fin.",
+        explanation: "« Balançoire » désigne une seule réalité (singulier). Hiboux, framboises et pinceaux ont une marque de pluriel (s ou x)."
+      }
+    ];
+
+    // TAB 3 QUESTIONS (L'Infinitif Présent - 8 exercises)
+    const TAB3_QUESTIONS = [
+      {
+        id: 1,
+        type: 'qcm',
+        question: "Qu'est-ce que l'infinitif présent d'un verbe ?",
+        options: [
+          "La forme de base, invariable et non conjuguée du verbe",
+          "Un nom commun qui désigne une personne",
+          "Une règle pour mettre les mots au pluriel",
+          "Un temps de conjugaison du passé uniquement"
+        ],
+        correct: "La forme de base, invariable et non conjuguée du verbe",
+        hint: "C'est le mot tel qu'on le trouve dans le dictionnaire !",
+        explanation: "L'infinitif présent est la forme de base du verbe. Il n'a qu'une seule forme et est donc invariable !"
+      },
+      {
+        id: 2,
+        type: 'tf',
+        question: "Vrai ou Faux : Le verbe à l'infinitif change de terminaison si on change la personne (il, nous, ils).",
+        options: ["Vrai", "Faux"],
+        correct: "Faux",
+        hint: "Rappelle-toi : l'infinitif présent est INVARIABLE.",
+        explanation: "Faux ! L'infinitif est invariable. Peu importe la personne, la forme à l'infinitif reste identique."
+      },
+      {
+        id: 3,
+        type: 'qcm',
+        question: "Quelles sont les 4 finales possibles pour classer les verbes à l'infinitif ?",
+        options: [
+          "-er, -ir, -oir, -re",
+          "-ette, -ion, -ment, -eur",
+          "-s, -x, -z, -e",
+          "-ai, -as, -a, -ons"
+        ],
+        correct: "-er, -ir, -oir, -re",
+        hint: "Pense à écouter, partir, voir, vendre.",
+        explanation: "Les quatre finales de l'infinitif présent sont : -er (écouter), -ir (partir), -oir (voir) et -re (vendre)."
+      },
+      {
+        id: 4,
+        type: 'qcm',
+        question: "Quel est l'infinitif du verbe souligné dans la phrase : « Les élèves ÉCRIVENT dans leur cahier. » ?",
+        options: ["Écrire", "Écrivain", "Écriture", "Écouter"],
+        correct: "Écrire",
+        hint: "Astuce : On peut dire « Il faut ... » pour trouver l'infinitif.",
+        explanation: "« Écrivent » vient du verbe à l'infinitif ÉCRIRE (qui se termine par -re)."
+      },
+      {
+        id: 5,
+        type: 'qcm',
+        question: "Parmi ces verbes, lequel appartient au PREMIER GROUPE ?",
+        options: ["Étudier", "Choisir", "Savoir", "Prendre"],
+        correct: "Étudier",
+        hint: "Le 1er groupe rassemble tous les verbes se terminant par -er.",
+        explanation: "Les verbes du premier groupe se terminent par -er à l'infinitif (comme « étudier »)."
+      },
+      {
+        id: 6,
+        type: 'tf',
+        question: "Vrai ou Faux : Les verbes « finir », « pouvoir » et « lire » font partie du deuxième groupe d'infinitif (-ir, -oir, -re).",
+        options: ["Vrai", "Faux"],
+        correct: "Vrai",
+        hint: "Le 2e groupe regroupe les finales en -ir, -oir et -re.",
+        explanation: "Vrai ! Les verbes en -ir, -oir et -re forment le deuxième groupe d'infinitif."
+      },
+      {
+        id: 7,
+        type: 'qcm',
+        question: "Dans quelle phrase trouve-t-on un verbe à l'INFINITIF ?",
+        options: [
+          "Pendant la récréation, j'aime courir vite.",
+          "Les enfants ont joué au ballon.",
+          "Nous rangions les pinceaux sur la table.",
+          "Le professeur explique la leçon."
+        ],
+        correct: "Pendant la récréation, j'aime courir vite.",
+        hint: "Cherche la terminaison -ir, -er, -oir ou -re.",
+        explanation: "« Courir » est un verbe à l'infinitif présent (terminaison en -ir)."
+      },
+      {
+        id: 8,
+        type: 'qcm',
+        question: "Pour trouver l'infinitif d'un verbe dans une phrase, quelle formule magique peut t'aider ?",
+        options: [
+          "« Il faut... » ou « Aimer... »",
+          "« Hier... » ou « Demain... »",
+          "« Un grand... » ou « Une petite... »",
+          "« Beaucoup de... »"
+        ],
+        correct: "« Il faut... » ou « Aimer... »",
+        hint: "Essaye de dire : « Il faut [mot] ».",
+        explanation: "Placer « Il faut... » devant le verbe permet de retrouver sa forme de base à l'infinitif ! (Ex: Il faut dessiner)."
+      }
+    ];
+
+    // TAB 4 GRAND QUIZ (10 items combining all concepts)
+    const TAB4_QUIZ = [
+      {
+        id: 1,
+        concept: "Le Nom Commun",
+        question: "Dans l'école, l'enseignant prépare une belle expérience. Combien y a-t-il de NOMS COMMUNS dans cette phrase ?",
+        options: ["3 noms (école, enseignant, expérience)", "1 nom (enseignant)", "2 noms (école, belle)", "4 noms (école, prépare, belle, expérience)"],
+        correct: "3 noms (école, enseignant, expérience)",
+        explanation: "Les 3 noms sont : « école » (une école), « enseignant » (un enseignant) et « expérience » (une expérience)."
+      },
+      {
+        id: 2,
+        concept: "Genre et Nombre",
+        question: "Quelle est la bonne orthographe pour accorder le groupe du nom : « Deux [ grand ] [ balançoire ] » ?",
+        options: ["deux grandes balançoires", "deux grand balançoire", "deux grands balançoires", "deux grande balançoires"],
+        correct: "deux grandes balançoires",
+        explanation: "« Balançoire » est féminin. Au pluriel (deux), on accorde : « deux grandes balançoires »."
+      },
+      {
+        id: 3,
+        concept: "L'Infinitif Présent",
+        question: "Trouve la forme à l'infinitif du verbe dans la phrase : « Nous APPRENONS nos leçons. »",
+        options: ["Apprendre", "Apprenant", "Appris", "Apprentissage"],
+        correct: "Apprendre",
+        hint: "Il faut...",
+        explanation: "« Il faut apprendre ». L'infinitif présent du verbe conjugué « apprenons » est « apprendre »."
+      },
+      {
+        id: 4,
+        concept: "Le Nom Commun",
+        question: "Quel test prouve que le mot « cartable » est un nom commun ?",
+        options: [
+          "On peut dire « Mon cartable bleu » (ajouter un déterminant et un adjectif)",
+          "On peut dire « Je cartable tous les jours »",
+          "On peut dire « Il ne cartable pas »",
+          "On ne peut pas l'utiliser dans une phrase"
+        ],
+        correct: "On peut dire « Mon cartable bleu » (ajouter un déterminant et un adjectif)",
+        explanation: "Ajouter un déterminant (mon) et un adjectif (bleu) confirme que « cartable » est bien un nom commun !"
+      },
+      {
+        id: 5,
+        concept: "Genre et Nombre",
+        question: "Quel est le genre et le nombre du nom « brocolis » dans « des brocolis verts » ?",
+        options: ["Masculin pluriel", "Féminin pluriel", "Masculin singulier", "Féminin singulier"],
+        correct: "Masculin pluriel",
+        explanation: "On dit « un brocoli » (masculin). Avec le « s » et « des », c'est masculin pluriel."
+      },
+      {
+        id: 6,
+        concept: "L'Infinitif Présent",
+        question: "Classe la terminaison du verbe « VOIR » : à quelle finale appartient-il ?",
+        options: ["-oir", "-er", "-ir", "-re"],
+        correct: "-oir",
+        explanation: "Le verbe « voir » se termine par -oir. Il fait partie des verbes en -oir du 2e groupe."
+      },
+      {
+        id: 7,
+        concept: "Accord dans la phrase",
+        question: "Dans « Le petit hibou observe la forêt », quel mot reçoit le genre et le nombre du nom « hibou » ?",
+        options: ["Le mot « petit » et le déterminant « Le »", "Seulement le mot « observe »", "Le mot « forêt »", "Aucun mot"],
+        correct: "Le mot « petit » et le déterminant « Le »",
+        explanation: "Le nom « hibou » est le donneur d'accord pour son déterminant (Le) et son adjectif (petit)."
+      },
+      {
+        id: 8,
+        concept: "L'Infinitif Présent",
+        question: "Lequel de ces mots est un verbe à l'infinitif du 1er groupe (-er) ?",
+        options: ["Recréer", "Cahier", "Premier", "Règler"],
+        correct: "Recréer",
+        explanation: "« Recréer » est un verbe à l'infinitif (-er). « Cahier » et « Premier » sont des noms ou adjectifs, pas des verbes !"
+      },
+      {
+        id: 9,
+        concept: "Genre des Noms",
+        question: "Parmi ces trois noms d'animaux : « fourmi », « balançoire » et « framboise », quel point commun ont-ils ?",
+        options: ["Ce sont tous des noms féminins", "Ce sont tous des noms masculins", "Ce sont des verbes à l'infinitif", "Ce sont des adjectifs"],
+        correct: "Ce sont tous des noms féminins",
+        explanation: "On dit : UNE fourmi, UNE balançoire, UNE framboise. Ce sont tous des noms féminins !"
+      },
+      {
+        id: 10,
+        concept: "Synthèse générale",
+        question: "Quelle phrase contient à la fois un NOM FÉMININ PLURIEL et un VERBE À L'INFINITIF ?",
+        options: [
+          "Les élèves aiment PENSIONS leurs vacances.",
+          "Il faut RANGER les ciseaux neufs.",
+          "Les petites FRAMBOISES sont délicieuses à MANGER.",
+          "Le professeur parle fort dans la classe."
+        ],
+        correct: "Les petites FRAMBOISES sont délicieuses à MANGER.",
+        explanation: "« Framboises » est un nom féminin pluriel et « MANGER » est un verbe à l'infinitif présent (-er) !"
+      }
+    ];
+
+    // --- MAIN COMPONENT ---
+    function App() {
+      const [activeTab, setActiveTab] = useState(1);
+      const [currentQIndex, setCurrentQIndex] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [isSubmitted, setIsSubmitted] = useState(false);
+      const [isCorrect, setIsCorrect] = useState(false);
+      const [showHint, setShowHint] = useState(false);
+      const [scores, setScores] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 });
+      const [completedTabs, setCompletedTabs] = useState({ 1: false, 2: false, 3: false, 4: false });
+      
+      // Interactive Mini-Demo States
+      const [demoGenre, setDemoGenre] = useState('masculin');
+      const [demoNombre, setDemoNombre] = useState('singulier');
+      const [demoNoun, setDemoNoun] = useState('cahier');
+
+      // Infinitive Sorter Interactive Widget State
+      const [sorterVerbs, setSorterVerbs] = useState([
+        { text: 'Écouter', category: '-er', correctCategory: '-er' },
+        { text: 'Partir', category: null, correctCategory: '-ir' },
+        { text: 'Voir', category: null, correctCategory: '-oir' },
+        { text: 'Vendre', category: null, correctCategory: '-re' },
+        { text: 'Jouer', category: null, correctCategory: '-er' },
+        { text: 'Finir', category: null, correctCategory: '-ir' }
+      ]);
+      const [sorterFeedback, setSorterFeedback] = useState(null);
+
+      // Reset state on tab change or question change
+      const resetQuestionState = () => {
+        setSelectedAnswer(null);
+        setIsSubmitted(false);
+        setIsCorrect(false);
+        setShowHint(false);
+      };
+
+      const handleTabChange = (tabId) => {
+        playSound('click');
+        setActiveTab(tabId);
+        setCurrentQIndex(0);
+        resetQuestionState();
+      };
+
+      const getQuestionsForTab = (tab) => {
+        switch (tab) {
+          case 1: return TAB1_QUESTIONS;
+          case 2: return TAB2_QUESTIONS;
+          case 3: return TAB3_QUESTIONS;
+          case 4: return TAB4_QUIZ;
+          default: return TAB1_QUESTIONS;
+        }
+      };
+
+      const currentQuestions = getQuestionsForTab(activeTab);
+      const currentQ = currentQuestions[currentQIndex];
+
+      const handleSelectOption = (option) => {
+        if (isSubmitted) return;
+        playSound('click');
+        setSelectedAnswer(option);
+      };
+
+      const handleSubmitAnswer = () => {
+        if (!selectedAnswer || isSubmitted) return;
+        const correct = selectedAnswer === currentQ.correct;
+        setIsSubmitted(true);
+        setIsCorrect(correct);
+
+        if (correct) {
+          playSound('success');
+          setScores(prev => ({ ...prev, [activeTab]: prev[activeTab] + 1 }));
+        } else {
+          playSound('error');
+        }
+      };
+
+      const handleNextQuestion = () => {
+        playSound('click');
+        if (currentQIndex < currentQuestions.length - 1) {
+          setCurrentQIndex(prev => prev + 1);
+          resetQuestionState();
+        } else {
+          // Tab complete
+          setCompletedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
+      };
+
+      const handleRestartTab = () => {
+        playSound('click');
+        setCurrentQIndex(0);
+        resetQuestionState();
+        setScores(prev => ({ ...prev, [activeTab]: 0 }));
+        setCompletedTabs(prev => ({ ...prev, [activeTab]: false }));
+      };
+
+      // Helper for Sorter interactive activity in Tab 3
+      const handleSortVerb = (verbIndex, category) => {
+        playSound('click');
+        const updated = [...sorterVerbs];
+        updated[verbIndex].category = category;
+        setSorterVerbs(updated);
+      };
+
+      const checkSorterAnswers = () => {
+        const allCorrect = sorterVerbs.every(v => v.category === v.correctCategory);
+        if (allCorrect) {
+          playSound('success');
+          setSorterFeedback({ success: true, message: "Bravo ! Tous les verbes sont parfaitement classés !" });
+        } else {
+          playSound('error');
+          setSorterFeedback({ success: false, message: "Certains verbes sont mal classés. Réessaye !" });
+        }
+      };
+
+      return (
+        <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-2 sm:p-4 md:p-6">
+          
+          {/* TOP HEADER / LOGO */}
+          <header className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg border-4 border-emerald-300 mb-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-center md:text-left">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-3xl shadow-inner text-white font-bold">
+                🏫
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-emerald-800 tracking-wide">
+                  Aventure Grammaticale
+                </h1>
+                <p className="text-xs sm:text-sm font-semibold text-emerald-600">
+                  Français 4ᵉ année • Le nom, son genre/nombre & l'infinitif
+                </p>
+              </div>
+            </div>
+
+            {/* Score & Progress Badge */}
+            <div className="flex items-center gap-2 sm:gap-4 bg-emerald-100 px-4 py-2 sm:py-3 rounded-2xl border-2 border-emerald-300">
+              <div className="text-center">
+                <span className="text-xs text-emerald-700 font-bold block uppercase tracking-wider">Score Total</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-900">
+                  {Object.values(scores).reduce((a, b) => a + b, 0)} / 34
+                </span>
+              </div>
+              <div className="text-2xl">⭐</div>
+            </div>
+          </header>
+
+          {/* NAVIGATION TABS */}
+          <nav className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            {[
+              { id: 1, title: "1. Le Nom Commun", icon: "🏷️", color: "emerald" },
+              { id: 2, title: "2. Genre & Nombre", icon: "⚖️", color: "teal" },
+              { id: 3, title: "3. L'Infinitif Présent", icon: "🏃", color: "cyan" },
+              { id: 4, title: "4. Grand Quiz", icon: "🏆", color: "amber" }
+            ].map(tab => {
+              const isActive = activeTab === tab.id;
+              const isDone = completedTabs[tab.id];
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`p-3 sm:p-4 rounded-2xl font-bold text-sm sm:text-base md:text-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 border-3 text-center shadow-md ${
+                    isActive
+                      ? "bg-emerald-600 text-white border-emerald-700 ring-4 ring-emerald-200 scale-102"
+                      : "bg-white text-emerald-900 border-emerald-200 hover:bg-emerald-100"
+                  }`}
+                >
+                  <span className="text-xl">{tab.icon}</span>
+                  <span className="line-clamp-1">{tab.title}</span>
+                  {isDone && <span className="text-green-300 text-sm">✓</span>}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border-4 border-emerald-200 flex flex-col justify-between min-h-[500px]">
+            
+            {/* TAB 1 CONTENT */}
+            {activeTab === 1 && (
+              <div className="flex-1 flex flex-col gap-6">
+                
+                {/* LESSON CARD & VISUAL DEMO */}
+                <div className="bg-emerald-50 rounded-2xl p-4 sm:p-6 border-2 border-emerald-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-emerald-900 mb-3 flex items-center gap-2">
+                    <span>💡</span> Fiche Règle : Qu'est-ce qu'un nom commun ?
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+                    Un <strong>nom</strong> est un mot qui permet de désigner une <strong>personne</strong> (<em>élève</em>), un <strong>animal</strong> (<em>hibou</em>), un <strong>objet</strong> (<em>cahier</em>), un <strong>lieu</strong> (<em>école</em>) ou un <strong>sentiment</strong> (<em>joie</em>).
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                    <div className="bg-white p-3 rounded-xl border border-emerald-300 shadow-sm">
+                      <span className="font-bold text-emerald-800 text-sm block mb-1">✨ Astuce 1 : Placer un déterminant</span>
+                      <p className="text-xs sm:text-sm text-slate-600">
+                        Tu peux ajouter <strong>un, une, le, la, des</strong> avant le nom.<br/>
+                        <em>Exemple : <strong>un</strong> pupitre, <strong>une</strong> balançoire, <strong>des</strong> ciseaux.</em>
+                      </p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-emerald-300 shadow-sm">
+                      <span className="font-bold text-emerald-800 text-sm block mb-1">🎨 Astuce 2 : Ajouter un adjectif</span>
+                      <p className="text-xs sm:text-sm text-slate-600">
+                        Tu peux ajouter un adjectif avant ou après le nom.<br/>
+                        <em>Exemple : un <strong>grand</strong> cahier <strong>rouge</strong>.</em>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* EXERCISES SECTION */}
+                {!completedTabs[1] ? (
+                  <QuestionRunner
+                    currentQ={currentQ}
+                    currentQIndex={currentQIndex}
+                    totalQ={currentQuestions.length}
+                    selectedAnswer={selectedAnswer}
+                    isSubmitted={isSubmitted}
+                    isCorrect={isCorrect}
+                    showHint={showHint}
+                    setShowHint={setShowHint}
+                    onSelectOption={handleSelectOption}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onNextQuestion={handleNextQuestion}
+                  />
+                ) : (
+                  <TabCompletionCard
+                    score={scores[1]}
+                    total={TAB1_QUESTIONS.length}
+                    onRestart={handleRestartTab}
+                    onNextTab={() => handleTabChange(2)}
+                    nextTabTitle="Genre & Nombre"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* TAB 2 CONTENT */}
+            {activeTab === 2 && (
+              <div className="flex-1 flex flex-col gap-6">
+                
+                {/* LESSON CARD & INTERACTIVE ACCORD SIMULATOR */}
+                <div className="bg-teal-50 rounded-2xl p-4 sm:p-6 border-2 border-teal-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-teal-900 mb-2 flex items-center gap-2">
+                    <span>⚖️</span> Fiche Règle : Le genre et le nombre du nom
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-700 mb-3">
+                    Le nom possède un <strong>genre</strong> (masculin / féminin) et un <strong>nombre</strong> (singulier / pluriel).<br/>
+                    <strong className="text-teal-800">Important !</strong> Le nom donne son genre et son nombre au <strong>déterminant</strong> et à l’<strong>adjectif</strong> qui l’accompagnent.
+                  </p>
+
+                  {/* Interactive Accord Simulator */}
+                  <div className="bg-white p-4 rounded-xl border border-teal-300 shadow-sm my-3">
+                    <h3 className="font-bold text-teal-800 text-sm sm:text-base mb-2">
+                      🧪 Démonstration interactive : Fabrique ton Groupe du Nom !
+                    </h3>
+                    
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <button
+                        onClick={() => { setDemoGenre('masculin'); setDemoNoun('cahier'); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border ${demoGenre === 'masculin' ? 'bg-blue-600 text-white' : 'bg-slate-100'}`}
+                      >
+                        Masculin (ex: cahier)
+                      </button>
+                      <button
+                        onClick={() => { setDemoGenre('féminin'); setDemoNoun('balançoire'); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border ${demoGenre === 'féminin' ? 'bg-pink-600 text-white' : 'bg-slate-100'}`}
+                      >
+                        Féminin (ex: balançoire)
+                      </button>
+
+                      <span className="text-slate-300">|</span>
+
+                      <button
+                        onClick={() => setDemoNombre('singulier')}
+                        className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border ${demoNombre === 'singulier' ? 'bg-teal-600 text-white' : 'bg-slate-100'}`}
+                      >
+                        Singulier (1 seul)
+                      </button>
+                      <button
+                        onClick={() => setDemoNombre('pluriel')}
+                        className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border ${demoNombre === 'pluriel' ? 'bg-teal-600 text-white' : 'bg-slate-100'}`}
+                      >
+                        Pluriel (Plusieurs)
+                      </button>
+                    </div>
+
+                    <div className="p-3 bg-teal-100 rounded-xl text-center border border-teal-300">
+                      <span className="text-xs text-teal-700 block font-bold mb-1">Groupe du Nom résultant :</span>
+                      <span className="text-xl sm:text-2xl font-black text-teal-900">
+                        {demoGenre === 'masculin' && demoNombre === 'singulier' && "Le petit cahier vert"}
+                        {demoGenre === 'masculin' && demoNombre === 'pluriel' && "Les petits cahiers verts"}
+                        {demoGenre === 'féminin' && demoNombre === 'singulier' && "La petite balançoire verte"}
+                        {demoGenre === 'féminin' && demoNombre === 'pluriel' && "Les petites balançoires vertes"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* EXERCISES SECTION */}
+                {!completedTabs[2] ? (
+                  <QuestionRunner
+                    currentQ={currentQ}
+                    currentQIndex={currentQIndex}
+                    totalQ={currentQuestions.length}
+                    selectedAnswer={selectedAnswer}
+                    isSubmitted={isSubmitted}
+                    isCorrect={isCorrect}
+                    showHint={showHint}
+                    setShowHint={setShowHint}
+                    onSelectOption={handleSelectOption}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onNextQuestion={handleNextQuestion}
+                  />
+                ) : (
+                  <TabCompletionCard
+                    score={scores[2]}
+                    total={TAB2_QUESTIONS.length}
+                    onRestart={handleRestartTab}
+                    onNextTab={() => handleTabChange(3)}
+                    nextTabTitle="L'Infinitif Présent"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* TAB 3 CONTENT */}
+            {activeTab === 3 && (
+              <div className="flex-1 flex flex-col gap-6">
+                
+                {/* LESSON CARD & INTERACTIVE VERB SORTER */}
+                <div className="bg-cyan-50 rounded-2xl p-4 sm:p-6 border-2 border-cyan-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-cyan-900 mb-2 flex items-center gap-2">
+                    <span>🏃</span> Fiche Règle : L'Infinitif présent du verbe
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-700 mb-3">
+                    L'<strong>infinitif présent</strong> est la forme de base du verbe (non conjuguée). Il est <strong>invariable</strong>.<br/>
+                    On classe les verbes selon 4 finales : <strong>-er</strong> (écouter), <strong>-ir</strong> (partir), <strong>-oir</strong> (voir), <strong>-re</strong> (vendre).
+                  </p>
+
+                  {/* Interactive Drag/Click Sorting Activity */}
+                  <div className="bg-white p-4 rounded-xl border border-cyan-300 shadow-sm my-3">
+                    <h3 className="font-bold text-cyan-800 text-sm sm:text-base mb-2">
+                      🖐️ Mini-Activité : Classe les verbes selon leur terminaison à l'infinitif !
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+                      {sorterVerbs.map((v, idx) => (
+                        <div key={idx} className="bg-slate-50 p-2 rounded-lg border flex flex-col gap-1 text-center">
+                          <span className="font-bold text-slate-800">{v.text}</span>
+                          <div className="flex justify-center gap-1">
+                            {['-er', '-ir', '-oir', '-re'].map(cat => (
+                              <button
+                                key={cat}
+                                onClick={() => handleSortVerb(idx, cat)}
+                                className={`px-2 py-0.5 text-xs rounded font-bold ${
+                                  v.category === cat ? 'bg-cyan-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                                }`}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={checkSorterAnswers}
+                        className="px-4 py-2 bg-cyan-600 text-white font-bold rounded-xl text-xs sm:text-sm hover:bg-cyan-700 shadow"
+                      >
+                        Vérifier le classement
+                      </button>
+                      {sorterFeedback && (
+                        <span className={`text-xs sm:text-sm font-bold ${sorterFeedback.success ? 'text-green-600' : 'text-red-600'}`}>
+                          {sorterFeedback.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* EXERCISES SECTION */}
+                {!completedTabs[3] ? (
+                  <QuestionRunner
+                    currentQ={currentQ}
+                    currentQIndex={currentQIndex}
+                    totalQ={currentQuestions.length}
+                    selectedAnswer={selectedAnswer}
+                    isSubmitted={isSubmitted}
+                    isCorrect={isCorrect}
+                    showHint={showHint}
+                    setShowHint={setShowHint}
+                    onSelectOption={handleSelectOption}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onNextQuestion={handleNextQuestion}
+                  />
+                ) : (
+                  <TabCompletionCard
+                    score={scores[3]}
+                    total={TAB3_QUESTIONS.length}
+                    onRestart={handleRestartTab}
+                    onNextTab={() => handleTabChange(4)}
+                    nextTabTitle="Grand Quiz Récapitulatif"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* TAB 4 CONTENT (GRAND QUIZ) */}
+            {activeTab === 4 && (
+              <div className="flex-1 flex flex-col gap-6">
+                <div className="bg-amber-50 rounded-2xl p-4 sm:p-6 border-2 border-amber-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-amber-900 mb-1 flex items-center gap-2">
+                    <span>🏆</span> Le Grand Quiz de Consolidation (10 Questions)
+                  </h2>
+                  <p className="text-sm text-slate-700">
+                    Mets à l'épreuve toutes tes connaissances sur le nom commun, le genre/nombre et l'infinitif présent !
+                  </p>
+                </div>
+
+                {!completedTabs[4] ? (
+                  <QuestionRunner
+                    currentQ={currentQ}
+                    currentQIndex={currentQIndex}
+                    totalQ={currentQuestions.length}
+                    selectedAnswer={selectedAnswer}
+                    isSubmitted={isSubmitted}
+                    isCorrect={isCorrect}
+                    showHint={showHint}
+                    setShowHint={setShowHint}
+                    onSelectOption={handleSelectOption}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onNextQuestion={handleNextQuestion}
+                    isQuiz={true}
+                  />
+                ) : (
+                  <TabCompletionCard
+                    score={scores[4]}
+                    total={TAB4_QUIZ.length}
+                    onRestart={handleRestartTab}
+                    isFinal={true}
+                  />
+                )}
+              </div>
+            )}
+
+          </main>
+
+          {/* FOOTER */}
+          <footer className="mt-4 text-center text-xs text-emerald-700 font-semibold pb-2">
+            Programme de Français (PFEQ) • 4ᵉ année du primaire • Application Pédagogique
+          </footer>
+
+        </div>
+      );
+    }
+
+    // --- REUSABLE QUESTION RUNNER COMPONENT ---
+    function QuestionRunner({
+      currentQ,
+      currentQIndex,
+      totalQ,
+      selectedAnswer,
+      isSubmitted,
+      isCorrect,
+      showHint,
+      setShowHint,
+      onSelectOption,
+      onSubmitAnswer,
+      onNextQuestion,
+      isQuiz = false
+    }) {
+      return (
+        <div className="flex-1 flex flex-col justify-between bg-slate-50 p-4 sm:p-6 rounded-2xl border-2 border-slate-200">
+          <div>
+            {/* Header / Progress bar */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs sm:text-sm font-extrabold text-emerald-800 uppercase tracking-wide bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
+                {isQuiz ? `Concept : ${currentQ.concept}` : `Exercice ${currentQIndex + 1} / ${totalQ}`}
+              </span>
+              <span className="text-xs font-bold text-slate-500">
+                Avancement : {Math.round(((currentQIndex + 1) / totalQ) * 100)}%
+              </span>
+            </div>
+
+            {/* Progress line */}
+            <div className="w-full bg-slate-200 h-2.5 rounded-full mb-6 overflow-hidden">
+              <div
+                className="bg-emerald-500 h-full transition-all duration-300"
+                style={{ width: `${((currentQIndex + 1) / totalQ) * 100}%` }}
+              ></div>
+            </div>
+
+            {/* Question Text */}
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-800 mb-6 leading-snug">
+              {currentQ.question}
+            </h3>
+
+            {/* Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {currentQ.options.map((option, idx) => {
+                const isSelected = selectedAnswer === option;
+                let btnStyle = "bg-white text-slate-800 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50";
+
+                if (isSubmitted) {
+                  if (option === currentQ.correct) {
+                    btnStyle = "bg-green-500 text-white border-green-600 font-bold ring-2 ring-green-300";
+                  } else if (isSelected && !isCorrect) {
+                    btnStyle = "bg-red-500 text-white border-red-600 font-bold";
+                  } else {
+                    btnStyle = "bg-slate-100 text-slate-400 border-slate-200 opacity-60";
+                  }
+                } else if (isSelected) {
+                  btnStyle = "bg-emerald-600 text-white border-emerald-700 font-bold ring-4 ring-emerald-200";
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => onSelectOption(option)}
+                    disabled={isSubmitted}
+                    className={`p-3 sm:p-4 rounded-xl border-2 text-left text-sm sm:text-base font-semibold transition-all break-words shadow-sm ${btnStyle}`}
+                  >
+                    <span className="mr-2 inline-block w-6 h-6 text-center rounded-full bg-slate-200 text-slate-700 text-xs font-black leading-6">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Hint Section */}
+            {currentQ.hint && !isSubmitted && (
+              <div className="mb-4">
+                {!showHint ? (
+                  <button
+                    onClick={() => setShowHint(true)}
+                    className="text-xs sm:text-sm font-bold text-amber-700 hover:underline flex items-center gap-1"
+                  >
+                    <span>🟡</span> Besoins d'un indice ?
+                  </button>
+                ) : (
+                  <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs sm:text-sm text-amber-900 font-medium">
+                    💡 <strong>Indice :</strong> {currentQ.hint}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Feedback display */}
+            {isSubmitted && (
+              <div className={`p-4 rounded-2xl border-2 mb-4 animate-fade-in ${isCorrect ? 'bg-green-100 border-green-400 text-green-900' : 'bg-red-100 border-red-400 text-red-900'}`}>
+                <div className="flex items-center gap-2 font-bold text-base sm:text-lg mb-1">
+                  <span>{isCorrect ? '🟢 Bravo ! Excellente réponse !' : '🔴 Oups, pas tout à fait !'}</span>
+                </div>
+                <p className="text-xs sm:text-sm font-medium leading-relaxed">
+                  {currentQ.explanation}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Action Controls */}
+          <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
+            {!isSubmitted ? (
+              <button
+                onClick={onSubmitAnswer}
+                disabled={!selectedAnswer}
+                className={`px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all shadow-md ${
+                  selectedAnswer
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95'
+                    : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                Vérifier ma réponse
+              </button>
+            ) : (
+              <button
+                onClick={onNextQuestion}
+                className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm sm:text-base hover:bg-emerald-700 active:scale-95 shadow-md flex items-center gap-2"
+              >
+                <span>{currentQIndex < totalQ - 1 ? 'Question Suivante' : 'Terminer cette section'}</span>
+                <span>➔</span>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // --- TAB COMPLETION SCREEN ---
+    function TabCompletionCard({ score, total, onRestart, onNextTab, nextTabTitle, isFinal = false }) {
+      const percentage = Math.round((score / total) * 100);
+
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-300">
+          <div className="text-6xl mb-4 animate-bounce">
+            {percentage >= 80 ? '🎉' : percentage >= 50 ? '👏' : '💪'}
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black text-emerald-900 mb-2">
+            {isFinal ? 'Grand Quiz Terminé !' : 'Bravo, section complétée !'}
+          </h2>
+
+          <p className="text-base text-slate-700 mb-6">
+            Tu as obtenu un score de <strong className="text-emerald-800 text-xl">{score} sur {total}</strong> ({percentage}%).
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
+              onClick={onRestart}
+              className="px-5 py-3 bg-white text-emerald-800 border-2 border-emerald-400 rounded-xl font-bold text-sm hover:bg-emerald-100 shadow"
+            >
+              🔄 Recommencer cette activité
+            </button>
+
+            {!isFinal && onNextTab && (
+              <button
+                onClick={onNextTab}
+                className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-lg"
+              >
+                Passer à : {nextTabTitle} ➔
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Render React App
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+
+</body>
+</html>
