@@ -466,6 +466,82 @@
       }
     ];
 
+    // TAB 5 QUESTIONS (Vocabulaire - 8 exercises)
+    const TAB5_QUESTIONS = [
+      {
+        id: 1,
+        type: 'qcm',
+        question: "Complète la phrase : « Pour faire un bonhomme de neige, je roule une grosse ___ de neige. »",
+        options: ["bulle", "boule", "plume", "cabane"],
+        correct: "boule",
+        hint: "C'est rond et c'est fait de neige !",
+        explanation: "On fait une « boule » de neige. Une bulle est souvent faite de savon."
+      },
+      {
+        id: 2,
+        type: 'qcm',
+        question: "Quel est le genre et le nombre du nom dans le groupe de mots « une mauvaise habitude » ?",
+        options: ["Féminin singulier", "Masculin singulier", "Féminin pluriel", "Masculin pluriel"],
+        correct: "Féminin singulier",
+        hint: "Regarde le déterminant « une ».",
+        explanation: "« Habitude » est un nom féminin. Puisqu'il y a « une », c'est au singulier."
+      },
+      {
+        id: 3,
+        type: 'qcm',
+        question: "Lequel de ces mots à l'étude est un verbe à l'infinitif ?",
+        options: ["pardon", "métro", "laver", "retour"],
+        correct: "laver",
+        hint: "Cherche le mot qui se termine par -er, -ir, -oir ou -re et qui indique une action.",
+        explanation: "« Laver » est un verbe à l'infinitif du 1er groupe (-er)."
+      },
+      {
+        id: 4,
+        type: 'qcm',
+        question: "Complète la phrase avec le bon pronom : « Ces crayons appartiennent à mes amis, ce sont ___. »",
+        options: ["la leur", "le leur", "les leurs", "la"],
+        correct: "les leurs",
+        hint: "« Crayons » est au pluriel, il faut donc un pronom au pluriel.",
+        explanation: "On utilise « les leurs » car il remplace « leurs crayons » qui est au pluriel."
+      },
+      {
+        id: 5,
+        type: 'qcm',
+        question: "Dans la phrase : « L'élève range ses cahiers dans son ___. », quel mot de vocabulaire manque-t-il ?",
+        options: ["meuble", "métro", "pupitre", "bol"],
+        correct: "pupitre",
+        hint: "C'est la table de travail de l'élève à l'école.",
+        explanation: "À l'école, l'élève s'assoit et range ses effets dans son « pupitre »."
+      },
+      {
+        id: 6,
+        type: 'qcm',
+        question: "Lequel de ces noms est de genre MASCULIN ?",
+        options: ["une larme", "une humeur", "un doute", "la mode"],
+        correct: "un doute",
+        hint: "Cherche le mot qui utilise le déterminant « un » ou « le ».",
+        explanation: "On dit « un doute », c'est donc un nom masculin."
+      },
+      {
+        id: 7,
+        type: 'qcm',
+        question: "Quel mot féminin singulier complète cette phrase : « Le roi habite dans la plus haute ___ du château. »",
+        options: ["ouest", "métro", "tour", "retour"],
+        correct: "tour",
+        hint: "C'est une partie haute d'un château.",
+        explanation: "On dit « une tour ». Ici, ça désigne la construction très haute."
+      },
+      {
+        id: 8,
+        type: 'qcm',
+        question: "Complète la phrase : « En hiver, les enfants aiment aller ___ sur le lac gelé. »",
+        options: ["laver", "patiner", "meuble", "doute"],
+        correct: "patiner",
+        hint: "C'est une action (verbe à l'infinitif) que l'on fait avec des patins.",
+        explanation: "« Patiner » est le verbe à l'infinitif qui convient pour cette activité sur la glace."
+      }
+    ];
+
     // --- MAIN COMPONENT ---
     function App() {
       const [activeTab, setActiveTab] = useState(1);
@@ -474,8 +550,8 @@
       const [isSubmitted, setIsSubmitted] = useState(false);
       const [isCorrect, setIsCorrect] = useState(false);
       const [showHint, setShowHint] = useState(false);
-      const [scores, setScores] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 });
-      const [completedTabs, setCompletedTabs] = useState({ 1: false, 2: false, 3: false, 4: false });
+      const [scores, setScores] = useState({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+      const [completedTabs, setCompletedTabs] = useState({ 1: false, 2: false, 3: false, 4: false, 5: false });
       
       // Interactive Mini-Demo States
       const [demoGenre, setDemoGenre] = useState('masculin');
@@ -514,6 +590,7 @@
           case 2: return TAB2_QUESTIONS;
           case 3: return TAB3_QUESTIONS;
           case 4: return TAB4_QUIZ;
+          case 5: return TAB5_QUESTIONS;
           default: return TAB1_QUESTIONS;
         }
       };
@@ -603,20 +680,22 @@
               <div className="text-center">
                 <span className="text-xs text-emerald-700 font-bold block uppercase tracking-wider">Score Total</span>
                 <span className="text-xl sm:text-2xl font-black text-emerald-900">
-                  {Object.values(scores).reduce((a, b) => a + b, 0)} / 34
+                  {Object.values(scores).reduce((a, b) => a + b, 0)} / 42
                 </span>
               </div>
               <div className="text-2xl">⭐</div>
             </div>
           </header>
 
+          {}
           {/* NAVIGATION TABS */}
-          <nav className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+          <nav className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
             {[
-              { id: 1, title: "1. Le Nom Commun", icon: "🏷️", color: "emerald" },
-              { id: 2, title: "2. Genre & Nombre", icon: "⚖️", color: "teal" },
-              { id: 3, title: "3. L'Infinitif Présent", icon: "🏃", color: "cyan" },
-              { id: 4, title: "4. Grand Quiz", icon: "🏆", color: "amber" }
+              { id: 1, title: "1. Nom Commun", icon: "🏷️", color: "emerald" },
+              { id: 2, title: "2. Genre/Nombre", icon: "⚖️", color: "teal" },
+              { id: 3, title: "3. L'Infinitif", icon: "🏃", color: "cyan" },
+              { id: 5, title: "4. Vocabulaire", icon: "📖", color: "indigo" },
+              { id: 4, title: "5. Grand Quiz", icon: "🏆", color: "amber" }
             ].map(tab => {
               const isActive = activeTab === tab.id;
               const isDone = completedTabs[tab.id];
@@ -864,6 +943,56 @@
                   <TabCompletionCard
                     score={scores[3]}
                     total={TAB3_QUESTIONS.length}
+                    onRestart={handleRestartTab}
+                    onNextTab={() => handleTabChange(5)}
+                    nextTabTitle="Vocabulaire"
+                  />
+                )}
+              </div>
+            )}
+
+            {}
+            {/* TAB 5 CONTENT (VOCABULAIRE) */}
+            {activeTab === 5 && (
+              <div className="flex-1 flex flex-col gap-6">
+                
+                {/* LESSON CARD & VOCAB LIST */}
+                <div className="bg-indigo-50 rounded-2xl p-4 sm:p-6 border-2 border-indigo-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                    <span>📖</span> Mots de vocabulaire à l'étude
+                  </h2>
+                  <p className="text-sm sm:text-base text-slate-700 mb-3">
+                    Voici les mots de la semaine. Observe bien leur <strong>genre</strong> (masculin/féminin) et s'il s'agit d'un <strong>verbe</strong> ou d'un <strong>pronom</strong> !
+                  </p>
+                  
+                  <div className="bg-white p-4 rounded-xl border border-indigo-300 shadow-sm flex flex-wrap gap-2">
+                    {['bon', '(une) boule', '(une) bulle', '(une) cabane', '(un) doute', '(une) habitude', '(une) humeur', 'la', 'la leur / le leur', '(la) mode', '(une) larme', '(un) bol', 'le', 'les leurs', '(le) métro', '(un) meuble', '(l\') ouest', '(un) pardon', 'patiner', '(une) plume', '(un) pupitre', '(un) retour', '(une) tour', 'laver'].map((mot, i) => (
+                      <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs sm:text-sm font-semibold rounded-lg border border-indigo-200">
+                        {mot}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* EXERCISES SECTION */}
+                {!completedTabs[5] ? (
+                  <QuestionRunner
+                    currentQ={currentQ}
+                    currentQIndex={currentQIndex}
+                    totalQ={currentQuestions.length}
+                    selectedAnswer={selectedAnswer}
+                    isSubmitted={isSubmitted}
+                    isCorrect={isCorrect}
+                    showHint={showHint}
+                    setShowHint={setShowHint}
+                    onSelectOption={handleSelectOption}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onNextQuestion={handleNextQuestion}
+                  />
+                ) : (
+                  <TabCompletionCard
+                    score={scores[5]}
+                    total={TAB5_QUESTIONS.length}
                     onRestart={handleRestartTab}
                     onNextTab={() => handleTabChange(4)}
                     nextTabTitle="Grand Quiz Récapitulatif"
