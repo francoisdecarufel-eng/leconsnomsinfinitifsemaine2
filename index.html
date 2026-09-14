@@ -126,7 +126,7 @@
       {
         id: 3,
         type: 'qcm',
-        question: "Laquelle de ces paires contient uniquement des NOMS COMMUNS de la classe d'école ?",
+        question: "Laquelle de ces paires contient uniquement des NOMS COMMUNS de la classe.",
         options: ["Cahier et Pupitre", "Cahier et Écrire", "Grand et Pupitre", "Sur et Crayon"],
         correct: "Cahier et Pupitre",
         hint: "Cherche deux mots devant lesquels on peut mettre « un » ou « le ».",
@@ -172,17 +172,8 @@
       {
         id: 7,
         type: 'qcm',
-        question: "À quelle personne grammaticale le nom commun appartient-il TOUJOURS ?",
-        options: ["1re personne", "2e personne", "3e personne", "4e personne"],
-        correct: "3e personne",
-        hint: "Pense à quel sujet on remplace un nom (il, elle, ils, elles).",
-        explanation: "Le nom possède toujours une personne : la 3e personne (singulier ou pluriel). Il peut ainsi donner sa personne au verbe !"
-      },
-      {
-        id: 8,
-        type: 'qcm',
-        question: "Quel mot de la phrase suivante est un nom désignant un sentiment/émotion ? « La joie se lisait sur le visage de Julie à l'école. »",
-        options: ["joie", "visage", "école", "lisait"],
+        question: "Quel mot de la phrase suivante est un nom désignant un sentiment/émotion ? « La joie se lisait sur le visage de Julie. »",
+        options: ["joie", "visage", "Julie", "lisait"],
         correct: "joie",
         hint: "Cherche le mot qui exprime ce que l'on ressent.",
         explanation: "« Joie » est un nom commun féminin singulier qui désigne un sentiment !"
@@ -194,7 +185,7 @@
       {
         id: 1,
         type: 'qcm',
-        question: "Quel est le genre et le nombre du groupe du nom : « des belles framboises » ?",
+        question: "Quel est le genre et le nombre du groupe du nom : « de belles framboises » ?",
         options: [
           "Féminin pluriel",
           "Masculin pluriel",
@@ -203,7 +194,7 @@
         ],
         correct: "Féminin pluriel",
         hint: "On dit UNE framboise et il y en a plusieurs (s).",
-        explanation: "« Framboise » est un nom féminin. Avec « des » et le « s » final, c'est au féminin pluriel !"
+        explanation: "« Framboise » est un nom féminin. Avec « belles » et le « s » final, c'est au féminin pluriel !"
       },
       {
         id: 2,
@@ -217,11 +208,11 @@
       {
         id: 3,
         type: 'qcm',
-        question: "Complète correctement la phrase : « Dans le gymnase, les ____ courances sautent fort. »",
+        question: "Complète correctement la phrase : « Dans le gymnase, les ____ sportives sautent très haut. »",
         options: ["fillettes", "garçon", "enfant", "élève"],
         correct: "fillettes",
         hint: "Le déterminant est « les » (pluriel) et on cherche un sujet féminin pluriel.",
-        explanation: "« Fillettes » est au féminin pluriel, ce qui s'accorde avec le déterminant « les » et le reste du groupe."
+        explanation: "« Fillettes » est au féminin pluriel, ce qui s'accorde avec le déterminant « les » et l'adjectif « sportives »."
       },
       {
         id: 4,
@@ -429,24 +420,24 @@
       },
       {
         id: 7,
-        concept: "Accord dans la phrase",
-        question: "Dans « Le petit hibou observe la forêt », quel mot reçoit le genre et le nombre du nom « hibou » ?",
-        options: ["Le mot « petit » et le déterminant « Le »", "Seulement le mot « observe »", "Le mot « forêt »", "Aucun mot"],
-        correct: "Le mot « petit » et le déterminant « Le »",
-        explanation: "Le nom « hibou » est le donneur d'accord pour son déterminant (Le) et son adjectif (petit)."
+        concept: "Le Groupe du Nom",
+        question: "Quel est le noyau dans le groupe du nom « le petit hibou » ?",
+        options: ["le", "petit", "hibou", "aucun"],
+        correct: "hibou",
+        explanation: "Le nom « hibou » est le noyau du groupe du nom, c'est lui qui donne son genre et son nombre aux autres mots."
       },
       {
         id: 8,
         concept: "L'Infinitif Présent",
         question: "Lequel de ces mots est un verbe à l'infinitif du 1er groupe (-er) ?",
-        options: ["Recréer", "Cahier", "Premier", "Règler"],
-        correct: "Recréer",
-        explanation: "« Recréer » est un verbe à l'infinitif (-er). « Cahier » et « Premier » sont des noms ou adjectifs, pas des verbes !"
+        options: ["voir", "entendre", "finir", "aimer"],
+        correct: "aimer",
+        explanation: "« aimer » est un verbe à l'infinitif (-er). Les autres font partie des autres groupes de verbes !"
       },
       {
         id: 9,
         concept: "Genre des Noms",
-        question: "Parmi ces trois noms d'animaux : « fourmi », « balançoire » et « framboise », quel point commun ont-ils ?",
+        question: "Parmi ces trois noms : « fourmi », « balançoire » et « framboise », quel point commun ont-ils ?",
         options: ["Ce sont tous des noms féminins", "Ce sont tous des noms masculins", "Ce sont des verbes à l'infinitif", "Ce sont des adjectifs"],
         correct: "Ce sont tous des noms féminins",
         explanation: "On dit : UNE fourmi, UNE balançoire, UNE framboise. Ce sont tous des noms féminins !"
@@ -456,7 +447,7 @@
         concept: "Synthèse générale",
         question: "Quelle phrase contient à la fois un NOM FÉMININ PLURIEL et un VERBE À L'INFINITIF ?",
         options: [
-          "Les élèves aiment PENSIONS leurs vacances.",
+          "Les élèves aiment penser à leurs vacances.",
           "Il faut RANGER les ciseaux neufs.",
           "Les petites FRAMBOISES sont délicieuses à MANGER.",
           "Le professeur parle fort dans la classe."
@@ -680,7 +671,7 @@
               <div className="text-center">
                 <span className="text-xs text-emerald-700 font-bold block uppercase tracking-wider">Score Total</span>
                 <span className="text-xl sm:text-2xl font-black text-emerald-900">
-                  {Object.values(scores).reduce((a, b) => a + b, 0)} / 42
+                  {Object.values(scores).reduce((a, b) => a + b, 0)} / 41
                 </span>
               </div>
               <div className="text-2xl">⭐</div>
